@@ -28,7 +28,7 @@ namespace DiscordBot
         private Random r;
 
         //Enter your bot user Token
-        private string token = "MTk4MjI5MDU4NjY3MDIwMjkw.CldGsg.c285zBv1ZgcyTSYD9F1iT5nYnD";
+        private string token = "MTk4MjI5MDU4NjY3MDIwMjkw.CldGsg.c285zBv1ZgcyTSYD9F1iT5nYnDo";
         //Enter your user ID
         private static ulong ownerId = 166671297923907584;
 
@@ -104,7 +104,7 @@ namespace DiscordBot
             #region Roll Command
             cService.CreateGroup("roll", cg =>
             {
-
+                #region 1d4
                 cg.CreateCommand("1d4")
                     .Description("Roll 1d4")
                     .Do(async (e) =>
@@ -113,7 +113,9 @@ namespace DiscordBot
 
                         await e.Channel.SendMessage($"{e.User.NicknameMention} rolled {d}");
                     });
+                #endregion
 
+                #region 1d6                
                 cg.CreateCommand("1d6")
                     .Description("Roll 1d6")
                     .Do(async (e) =>
@@ -122,7 +124,9 @@ namespace DiscordBot
 
                         await e.Channel.SendMessage($"{e.User.NicknameMention} rolled {d}");
                     });
+                #endregion
 
+                #region 1d12                
                 cg.CreateCommand("1d12")
                     .Description("Roll 1d12")
                     .Do(async (e) =>
@@ -131,7 +135,9 @@ namespace DiscordBot
 
                         await e.Channel.SendMessage($"{e.User.NicknameMention} rolled {d}");
                     });
+                #endregion
 
+                #region 1d20
                 cg.CreateCommand("1d20")
                     .Description("Roll 1d20")
                     .Do(async (e) =>
@@ -140,7 +146,9 @@ namespace DiscordBot
 
                         await e.Channel.SendMessage($"{e.User.NicknameMention} rolled {d}");
                     });
+                #endregion
 
+                #region Custom              
                 cg.CreateCommand("custom")
                     .Parameter("qtyDice", ParameterType.Required)
                     .Parameter("sizeDice", ParameterType.Required)
@@ -158,6 +166,7 @@ namespace DiscordBot
 
                         await e.Channel.SendMessage($"{e.User.NicknameMention} rolled {qtyDice}d{sizeDice} and got {d}");
                     });
+                #endregion
             });
 
             #endregion
@@ -176,6 +185,7 @@ The bot can be found at : https://github.com/IluvatarTheReal/IluvatarSuperBot");
             #region Role Command
             cService.CreateGroup("role", cg =>
             {
+                #region List
                 cg.CreateCommand("list")
                     .Do(async (e) =>
                     {
@@ -187,7 +197,9 @@ The bot can be found at : https://github.com/IluvatarTheReal/IluvatarSuperBot");
                         }
                         await e.Channel.SendMessage(message);
                     });
+                #endregion
 
+                #region UserIn
                 cg.CreateCommand("userin")
                     .Description("List all user with the chosen role")
                     .Parameter("role", ParameterType.Unparsed)
@@ -196,7 +208,7 @@ The bot can be found at : https://github.com/IluvatarTheReal/IluvatarSuperBot");
                         Role role;
                         IEnumerable<User> users;
 
-                        role = e.Server.Roles.Where(x => x.Name.ToLower().Equals(e.GetArg("role").ToLower())).Select(x => x).First();
+                        role = BasicQuery.GetRole(e, "role");
                         users = e.Server.Users.Where(x => x.Roles.Contains(role));
 
                         string message = $"The {role.Mention} are :\n";
@@ -207,61 +219,142 @@ The bot can be found at : https://github.com/IluvatarTheReal/IluvatarSuperBot");
 
                         await e.Channel.SendMessage(message);
                     });
+                #endregion
+
+                #region Me            
+                cg.CreateCommand("me")
+                    .Do(async (e) =>
+                    {
+                        IEnumerable<Role> roles = e.User.Roles.OrderByDescending(r => r.Position);
+
+                        string message = $"{e.User.NicknameMention} roles are :\n";
+                        foreach (var r in roles)
+                        {
+                            message += $"{r.Mention}\n";
+                        }
+
+                        await e.Channel.SendMessage(message);
+                    });
+                #endregion
+
+                #region User                
+                cg.CreateCommand("user")
+                    .Parameter("user", ParameterType.Unparsed)
+                    .Do(async (e) =>
+                    {
+                        User user = BasicQuery.GetUser(e, "user");
+
+                        IEnumerable<Role> roles = user.Roles.OrderByDescending(r => r.Position);
+
+                        string message = $"{user.NicknameMention} roles are :\n";
+                        foreach (var r in roles)
+                        {
+                            message += $"{r.Mention}\n";
+                        }
+
+                        await e.Channel.SendMessage(message);
+                    });
+                #endregion
             });
             #endregion
 
-            #region Chat Command
+            #region Channel Command
             cService.CreateGroup("channel", cg =>
             {
+                #region Clear                
                 cg.CreateCommand("clear")
+                    .MinPermissions((int)PermissionLevel.ChannelModerator)
                     .Description("Clear the channel removing all message sent since the bot went online.")
                     .Do(async (e) =>
                     {
-                        PermissionLevel perm = GetPermissions(e.User, e.Channel);
-                        if (Convert.ToInt32(perm) >= 1)
-                        {
-                            await e.Channel.DeleteMessages(e.Channel.Messages.ToArray());
-                        }
+                        await e.Channel.DeleteMessages(e.Channel.Messages.ToArray());
                     });
+                #endregion
 
+                #region Topic
                 cg.CreateCommand("topic")
                     .Description("Return channel's topic")
                     .Do(async (e) =>
                     {
                         await e.Channel.SendMessage(e.Channel.Topic);
                     });
-
+                #endregion
             });
             #endregion
 
-            #region Premission Command
+            #region Permission Command
             cService.CreateGroup("permission", cg =>
             {
+                #region Me
                 cg.CreateCommand("me")
                     .Description("Return your permission level on this channel.")
                     .Do(async (e) =>
                     {
                         PermissionLevel perm = GetPermissions(e.User, e.Channel);
 
-                        await e.Channel.SendMessage(PermissionUser(e.User, perm));
+                        await e.Channel.SendMessage(BasicQuery.PermissionNameUser(e.User, perm));
                     });
+                #endregion
 
+                #region List
                 cg.CreateCommand("list")
                     .Do(async (e) =>
                     {
                         await e.Channel.SendMessage("6 - BOT OWNER\n5 - SERVER OWNER\n4 - SERVER ADMIN\n3 - SERVER MODERATOR\n2 - CHANNEL ADMIN\n1 - CHANNEL MODERATOR\n0 - USER");
                     });
+                #endregion
 
+                #region User
                 cg.CreateCommand("user")
                     .Description("Return the permission level of an other user on this channel.")
                     .Parameter("user", ParameterType.Unparsed)
                     .Do(async (e) =>
                     {
-                        User user = e.Channel.Users.Where(u => u.Name.ToLower().Equals(e.GetArg("user").ToLower())).Select(x => x).First();
+                        User user = BasicQuery.GetUser(e, "user");
                         PermissionLevel perm = GetPermissions(user, e.Channel);
 
-                        await e.Channel.SendMessage(PermissionUser(user, perm));
+                        await e.Channel.SendMessage(BasicQuery.PermissionNameUser(user, perm));
                     });
+                #endregion
+            });
+            #endregion
+
+            #region Server Command
+            cService.CreateGroup("server", cg =>
+            {
+                #region Kick
+                //TODO : Kick Command
+                #endregion
+
+                #region Ban
+                //TODO : Ban Command
+                #endregion
+            });
+            #endregion
+
+            #region Search Command
+            cService.CreateGroup("search", cg =>
+            {
+                #region User
+                cg.CreateCommand("user")
+                    .Parameter("user", ParameterType.Unparsed)
+                    .Do(async (e) =>
+                    {
+                        IEnumerable<User> users = BasicQuery.SearchUsers(e, "user");
+
+                        string message = $"{e.User.NicknameMention}, your research returned {users.Count()} result(s)\n";
+                        foreach (var u in users)
+                        {
+                            message += $"{u.Name}\n";
+                        }                       
+
+                        await e.Channel.SendMessage(message);
+                    });
+                #endregion
+
+                #region Role
+                //TODO : Search Role
+                #endregion
 
             });
             #endregion
@@ -292,32 +385,6 @@ The bot can be found at : https://github.com/IluvatarTheReal/IluvatarSuperBot");
             return PermissionLevel.User;
         }
 
-        private string PermissionUser(User u, PermissionLevel perm)
-        {
-            if (perm == PermissionLevel.BotOwner)
-                return ($"{u.NicknameMention} is 6 - BOT OWNER");
-
-            else if (perm == PermissionLevel.ServerOwner)
-                return ($"{u.NicknameMention} is 5 - SERVER OWNER");
-
-            else if (perm == PermissionLevel.ServerAdmin)
-                return ($"{u.NicknameMention} is 4 - SERVER ADMIN");
-
-            else if (perm == PermissionLevel.ServerModerator)
-                return ($"{u.NicknameMention} is 3 - SERVER MODERATOR");
-
-            else if (perm == PermissionLevel.ChannelAdmin)
-                return ($"{u.NicknameMention} is 2 - CHANNEL ADMIN");
-
-            else if (perm == PermissionLevel.ChannelModerator)
-                return ($"{u.NicknameMention} is 1 - CHANNEL MODERATOR");
-
-            else if (perm == PermissionLevel.User)
-                return ($"{u.NicknameMention} is 0 - USER");
-
-            else
-                return ($"{u.NicknameMention} is 0 - USER");
-        }
 
         public void Log(object sender, LogMessageEventArgs e)
         {
