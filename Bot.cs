@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.Audio;
 using Discord.Commands;
 using Discord.Commands.Permissions.Levels;
 using Discord.Legacy;
@@ -26,6 +27,7 @@ namespace DiscordBot
     {
         private DiscordClient discordBot;
         private Random r;
+        private Channel voiceChannel;
 
         //Enter your bot user Token
         private string token = "MTk4MjI5MDU4NjY3MDIwMjkw.CldGsg.c285zBv1ZgcyTSYD9F1iT5nYnDo";
@@ -36,6 +38,8 @@ namespace DiscordBot
         public Bot()
         {
             r = new Random();
+
+
             discordBot = new DiscordClient(x =>
             {
                 x.AppName = "IluvatarSuperBot";
@@ -50,8 +54,12 @@ namespace DiscordBot
                 x.HelpMode = HelpMode.Public;
             });
 
-
             discordBot.UsingPermissionLevels((u, c) => (int)GetPermissions(u, c));
+
+            discordBot.UsingAudio(x =>
+            {
+                x.Mode = AudioMode.Outgoing;
+            });
 
             CreateCommand();
 
@@ -59,11 +67,14 @@ namespace DiscordBot
             {
                 await discordBot.Connect(token);
             });
+
+
+
         }
 
         public void CreateCommand()
         {
-            var cService = discordBot.GetService<CommandService>();
+            CommandService cService = discordBot.GetService<CommandService>();
 
             #region Ping Command
             cService.CreateCommand("ping")
@@ -346,7 +357,7 @@ The bot can be found at : https://github.com/IluvatarTheReal/IluvatarSuperBot");
                         foreach (var u in users)
                         {
                             message += $"{u.Name}\n";
-                        }                       
+                        }
 
                         await e.Channel.SendMessage(message);
                     });
@@ -357,6 +368,33 @@ The bot can be found at : https://github.com/IluvatarTheReal/IluvatarSuperBot");
                 #endregion
 
             });
+            #endregion
+
+            #region Music Command
+            cService.CreateGroup("music", cg =>
+            {
+                cg.CreateCommand("start")
+                    .Do(async (e) =>
+                    {
+                        //Channel voiceChannel = discordBot.FindServers("Bot Music").FirstOrDefault().VoiceChannels.FirstOrDefault();
+                        voiceChannel = e.Server.VoiceChannels.Where(c => c.Name.ToLower().Contains(("Bot Music").ToLower())).Select(x => x).First();
+                        var aService = await discordBot.GetService<AudioService>()
+                            .Join(voiceChannel);
+                        string filePath = $"Music\\01.wma";
+
+                        Audio.StartMusic(filePath, discordBot, voiceChannel, aService);
+
+                    });
+                cg.CreateCommand("stop")
+                    .Do(async (e) =>
+                    {
+                        voiceChannel = e.Server.VoiceChannels.Where(c => c.Name.ToLower().Contains(("Bot Music").ToLower())).Select(x => x).First();
+                        await discordBot.GetService<AudioService>()
+                            .Leave(voiceChannel);
+                    });
+
+            });
+
             #endregion
         }
 
@@ -389,6 +427,11 @@ The bot can be found at : https://github.com/IluvatarTheReal/IluvatarSuperBot");
         public void Log(object sender, LogMessageEventArgs e)
         {
             Console.WriteLine($"[{e.Severity}]  [{e.Source}]  {e.Message}");
+        }
+
+        public void StartMusic(string filePath)
+        {
+
         }
 
     }
