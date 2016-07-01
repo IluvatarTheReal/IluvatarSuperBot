@@ -28,7 +28,9 @@ namespace DiscordBot
         private Random r;
 
         //Enter your bot user Token
-        private string token = "MTk4MjI5MDU4NjY3MDIwMjkw.CldGsg.c285zBv1ZgcyTSYD9F1iT5nYnDo";        
+        private string token = "MTk4MjI5MDU4NjY3MDIwMjkw.CldGsg.c285zBv1ZgcyTSYD9F1iT5nYnD";
+        //Enter your user ID
+        private static ulong ownerId = 166671297923907584;
 
 
         public Bot()
@@ -37,7 +39,7 @@ namespace DiscordBot
             discordBot = new DiscordClient(x =>
             {
                 x.AppName = "IluvatarSuperBot";
-                x.LogLevel = LogSeverity.Debug;
+                x.LogLevel = LogSeverity.Info;
                 x.LogHandler = Log;
             });
 
@@ -47,6 +49,7 @@ namespace DiscordBot
                 x.AllowMentionPrefix = true;
                 x.HelpMode = HelpMode.Public;
             });
+
 
             discordBot.UsingPermissionLevels((u, c) => (int)GetPermissions(u, c));
 
@@ -164,7 +167,9 @@ namespace DiscordBot
                 .Description("Try it!")
                 .Do(async (e) =>
                 {
-                    await e.Channel.SendMessage("Iluvatar's Super Bot was coded by Iluvatar/Samuel Reid");
+                    Console.WriteLine($"[COMMAND]  [{e.User.Name}]  The CREDIT command was used.");
+                    await e.Channel.SendMessage(@"Iluvatar's Super Bot was coded by Iluvatar/Samuel Reid
+The bot can be found at : https://github.com/IluvatarTheReal/IluvatarSuperBot");
                 });
             #endregion       
 
@@ -206,47 +211,65 @@ namespace DiscordBot
             #endregion
 
             #region Chat Command
-            cService.CreateGroup("chat", cg =>
+            cService.CreateGroup("channel", cg =>
             {
                 cg.CreateCommand("clear")
                     .Description("Clear the channel removing all message sent since the bot went online.")
                     .Do(async (e) =>
                     {
-                        await e.Channel.DeleteMessages(e.Channel.Messages.ToArray());
+                        PermissionLevel perm = GetPermissions(e.User, e.Channel);
+                        if (Convert.ToInt32(perm) >= 1)
+                        {
+                            await e.Channel.DeleteMessages(e.Channel.Messages.ToArray());
+                        }
                     });
 
-                cg.CreateCommand("permission")
-                    .Description("Return your permission status")
+                cg.CreateCommand("topic")
+                    .Description("Return channel's topic")
+                    .Do(async (e) =>
+                    {
+                        await e.Channel.SendMessage(e.Channel.Topic);
+                    });
+
+            });
+            #endregion
+
+            #region Premission Command
+            cService.CreateGroup("permission", cg =>
+            {
+                cg.CreateCommand("me")
+                    .Description("Return your permission level on this channel.")
                     .Do(async (e) =>
                     {
                         PermissionLevel perm = GetPermissions(e.User, e.Channel);
 
-                        if (perm== PermissionLevel.ServerAdmin)
-                            await e.Channel.SendMessage($"SERVER ADMIN");
-
-                        else if (perm == PermissionLevel.ChannelAdmin)
-                            await e.Channel.SendMessage($"CHANNEL ADMIN");
-
-                        else if (perm == PermissionLevel.ServerModerator)
-                            await e.Channel.SendMessage($"SERVER MODERATOR");
-
-                        else if (perm == PermissionLevel.ChannelModerator)
-                            await e.Channel.SendMessage($"CHANNEL MODERATOR");
-
-                        else if (perm == PermissionLevel.ServerOwner)
-                            await e.Channel.SendMessage($"SERVER OWNER");
-
-                        else if (perm == PermissionLevel.User)
-                            await e.Channel.SendMessage($"USER");
-
+                        await e.Channel.SendMessage(PermissionUser(e.User, perm));
                     });
+
+                cg.CreateCommand("list")
+                    .Do(async (e) =>
+                    {
+                        await e.Channel.SendMessage("6 - BOT OWNER\n5 - SERVER OWNER\n4 - SERVER ADMIN\n3 - SERVER MODERATOR\n2 - CHANNEL ADMIN\n1 - CHANNEL MODERATOR\n0 - USER");
+                    });
+
+                cg.CreateCommand("user")
+                    .Description("Return the permission level of an other user on this channel.")
+                    .Parameter("user", ParameterType.Unparsed)
+                    .Do(async (e) =>
+                    {
+                        User user = e.Channel.Users.Where(u => u.Name.ToLower().Equals(e.GetArg("user").ToLower())).Select(x => x).First();
+                        PermissionLevel perm = GetPermissions(user, e.Channel);
+
+                        await e.Channel.SendMessage(PermissionUser(user, perm));
+                    });
+
             });
             #endregion
         }
 
         private static PermissionLevel GetPermissions(User u, Channel c)
         {
-            if (u.Id == 0000) // Replace this with your own UserId
+            if (u.Id == ownerId)
                 return PermissionLevel.BotOwner;
 
             if (!c.IsPrivate)
@@ -267,6 +290,33 @@ namespace DiscordBot
                     return PermissionLevel.ChannelModerator;
             }
             return PermissionLevel.User;
+        }
+
+        private string PermissionUser(User u, PermissionLevel perm)
+        {
+            if (perm == PermissionLevel.BotOwner)
+                return ($"{u.NicknameMention} is 6 - BOT OWNER");
+
+            else if (perm == PermissionLevel.ServerOwner)
+                return ($"{u.NicknameMention} is 5 - SERVER OWNER");
+
+            else if (perm == PermissionLevel.ServerAdmin)
+                return ($"{u.NicknameMention} is 4 - SERVER ADMIN");
+
+            else if (perm == PermissionLevel.ServerModerator)
+                return ($"{u.NicknameMention} is 3 - SERVER MODERATOR");
+
+            else if (perm == PermissionLevel.ChannelAdmin)
+                return ($"{u.NicknameMention} is 2 - CHANNEL ADMIN");
+
+            else if (perm == PermissionLevel.ChannelModerator)
+                return ($"{u.NicknameMention} is 1 - CHANNEL MODERATOR");
+
+            else if (perm == PermissionLevel.User)
+                return ($"{u.NicknameMention} is 0 - USER");
+
+            else
+                return ($"{u.NicknameMention} is 0 - USER");
         }
 
         public void Log(object sender, LogMessageEventArgs e)
