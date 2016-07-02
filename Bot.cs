@@ -374,15 +374,20 @@ The bot can be found at : https://github.com/IluvatarTheReal/IluvatarSuperBot");
             cService.CreateGroup("music", cg =>
             {
                 cg.CreateCommand("start")
+                    .Parameter("tune#", ParameterType.Required)
                     .Do(async (e) =>
                     {
                         //Channel voiceChannel = discordBot.FindServers("Bot Music").FirstOrDefault().VoiceChannels.FirstOrDefault();
                         voiceChannel = e.Server.VoiceChannels.Where(c => c.Name.ToLower().Contains(("Bot Music").ToLower())).Select(x => x).First();
                         var aService = await discordBot.GetService<AudioService>()
                             .Join(voiceChannel);
-                        string filePath = $"Music\\01.wma";
+                        string filePath = $"Music\\{e.GetArg("tune#")}.wma";
+
+                        await e.Channel.SendMessage("Music started on voice channel *Bot Music*");
 
                         Audio.StartMusic(filePath, discordBot, voiceChannel, aService);
+
+                        await e.Channel.SendMessage("Music ended on voice channel *Bot Music*");
 
                     });
                 cg.CreateCommand("stop")
@@ -391,6 +396,10 @@ The bot can be found at : https://github.com/IluvatarTheReal/IluvatarSuperBot");
                         voiceChannel = e.Server.VoiceChannels.Where(c => c.Name.ToLower().Contains(("Bot Music").ToLower())).Select(x => x).First();
                         await discordBot.GetService<AudioService>()
                             .Leave(voiceChannel);
+
+                        Audio.StopPlaying();
+
+                        await e.Channel.SendMessage("Music was stopped on channel *Bot Music*");
                     });
 
             });

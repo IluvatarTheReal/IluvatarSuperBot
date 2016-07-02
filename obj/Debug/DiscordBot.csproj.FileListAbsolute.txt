@@ -47,4 +47,3 @@ C:\Users\samuel\Desktop\Dossier\DiscordIluvatarSuperBot\DiscordBot\DiscordBot\bi
 C:\Users\samuel\Desktop\Dossier\DiscordIluvatarSuperBot\DiscordBot\DiscordBot\bin\Debug\websocket-sharp.xml
 C:\Users\samuel\Desktop\Dossier\DiscordIluvatarSuperBot\DiscordBot\DiscordBot\obj\Debug\DiscordBot.csprojResolveAssemblyReference.cache
 C:\Users\samuel\Desktop\Dossier\DiscordIluvatarSuperBot\DiscordBot\DiscordBot\bin\Debug\Discord.Net.Audio.dll
-C:\Users\samuel\Desktop\Dossier\DiscordIluvatarSuperBot\DiscordBot\DiscordBot\bin\Debug\Music\01.wma

@@ -102,20 +102,8 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <Content Include="Music\01.wma">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Music\02.wma" />
-    <Content Include="Music\03.wma" />
-    <Content Include="Music\04.wma" />
-    <Content Include="Music\05.wma" />
-    <Content Include="Music\06.wma" />
-    <Content Include="Music\07.wma" />
-    <Content Include="Music\08.wma" />
-    <Content Include="Music\09.wma" />
-    <Content Include="Music\10.wma" />
+    <Folder Include="Music\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

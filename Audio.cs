@@ -13,31 +13,43 @@ using Discord.Commands.Permissions.Levels;
 
 namespace DiscordBot
 {
-    public static class Audio
+    public class Audio
     {
+        private static bool isPlaying = false;
+
         public static void StartMusic(string filePath, DiscordClient discordBot, Channel voiceChannel, IAudioClient aService)
         {
-            var channelCount = discordBot.GetService<AudioService>().Config.Channels; // Get the number of AudioChannels our AudioService has been configured to use.
-            var OutFormat = new WaveFormat(48000, 16, channelCount); // Create a new Output Format, using the spec that Discord will accept, and with the number of channels that our client supports.
-            using (var AudioReader = new AudioFileReader(filePath)) // Create a new Disposable MP3FileReader, to read audio from the filePath parameter
-            using (var resampler = new MediaFoundationResampler(AudioReader, OutFormat)) // Create a Disposable Resampler, which will convert the read MP3 data to PCM, using our Output Format
+            if (!isPlaying)
             {
-                resampler.ResamplerQuality = 60; // Set the quality of the resampler to 60, the highest quality
-                int blockSize = OutFormat.AverageBytesPerSecond / 50; // Establish the size of our AudioBuffer
-                byte[] buffer = new byte[blockSize];
-                int byteCount;
-
-                while ((byteCount = resampler.Read(buffer, 0, blockSize)) > 0) // Read audio into our buffer, and keep a loop open while data is present
+                var channelCount = discordBot.GetService<AudioService>().Config.Channels;
+                var OutFormat = new WaveFormat(48000, 16, channelCount);
+                using (var AudioReader = new AudioFileReader(filePath))
+                using (var resampler = new MediaFoundationResampler(AudioReader, OutFormat))
                 {
-                    if (byteCount < blockSize)
+                    resampler.ResamplerQuality = 60; // Set the quality of the resampler to 60, the highest quality
+                    int blockSize = OutFormat.AverageBytesPerSecond / 50;
+                    byte[] buffer = new byte[blockSize];
+                    int byteCount;
+                    isPlaying = true;
+                    while ((byteCount = resampler.Read(buffer, 0, blockSize)) > 0)
                     {
-                        // Incomplete Frame
-                        for (int i = byteCount; i < blockSize; i++)
-                            buffer[i] = 0;
+                        if (byteCount < blockSize)
+                        {
+
+                            for (int i = byteCount; i < blockSize; i++)
+                                buffer[i] = 0;
+                        }
+                        aService.Send(buffer, 0, blockSize);
                     }
-                    aService.Send(buffer, 0, blockSize); // Send the buffer to Discord
+                    isPlaying = false;
                 }
             }
         }
+
+        public static void StopPlaying()
+        {
+            isPlaying = false;
+        }
     }
 }
+
