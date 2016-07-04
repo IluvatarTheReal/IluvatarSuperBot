@@ -269,7 +269,6 @@ The bot can be found at : https://github.com/IluvatarTheReal/IluvatarSuperBot");
                 #endregion
             });
             #endregion
-
             
             #region Channel Command
             cService.CreateGroup("channel", cg =>
