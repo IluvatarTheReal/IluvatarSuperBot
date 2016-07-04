@@ -4,6 +4,7 @@ using Discord.Commands.Permissions.Levels;
 using Discord.Legacy;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,7 +16,12 @@ namespace DiscordBot
     {
         public static IEnumerable<User> SearchUsers(CommandEventArgs e, string user)
         {
-            return e.Server.Users.Where(u => u.Name.ToLower().Contains(e.GetArg(user)));
+            return e.Server.Users.Where(u => u.Name.ToLower().Contains(e.GetArg(user).ToLower()));
+        }
+
+        public static IEnumerable<Role> SearchRoles(CommandEventArgs e, string roles)
+        {
+            return e.Server.Roles.Where(r => r.Name.ToLower().Contains(e.GetArg(roles).ToLower()));
         }
 
         public static User GetUser(CommandEventArgs e, string user)
@@ -53,6 +59,17 @@ namespace DiscordBot
 
             else
                 return ($"{u.NicknameMention} is 0 - USER");
+        }
+
+        public static IEnumerable<string> GetSongs()
+        {
+
+            string[] songs = Directory.GetFiles(@"Music\");
+            for (int i = 0; i < songs.Length; i++)
+            {
+               songs[i] = songs[i].Replace("Music\\", "");
+            }
+            return songs;
         }
 
     }

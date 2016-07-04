@@ -5,6 +5,7 @@ using Discord.Commands.Permissions.Levels;
 using Discord.Legacy;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -269,6 +270,7 @@ The bot can be found at : https://github.com/IluvatarTheReal/IluvatarSuperBot");
             });
             #endregion
 
+            
             #region Channel Command
             cService.CreateGroup("channel", cg =>
             {
@@ -343,7 +345,7 @@ The bot can be found at : https://github.com/IluvatarTheReal/IluvatarSuperBot");
             });
             #endregion
 
-            #region Search Command
+            #region Unassigned Search Command
             cService.CreateGroup("search", cg =>
             {
                 #region User
@@ -364,32 +366,49 @@ The bot can be found at : https://github.com/IluvatarTheReal/IluvatarSuperBot");
                 #endregion
 
                 #region Role
-                //TODO : Search Role
-                #endregion
+                cg.CreateCommand("role")
+                    .Parameter("role", ParameterType.Unparsed)
+                    .Do(async (e) =>
+                    {
+                        IEnumerable<Role> roles = BasicQuery.SearchRoles(e, "role");
 
+                        string message = $"{e.User.NicknameMention}, your research returned {roles.Count()} result(s)\n";
+                        foreach (var r in roles)
+                        {
+                            message += $"{r.Name}\n";
+                        }
+
+                        await e.Channel.SendMessage(message);
+                    });
+                #endregion             
             });
             #endregion
 
             #region Music Command
             cService.CreateGroup("music", cg =>
             {
+                #region Start
                 cg.CreateCommand("start")
-                    .Parameter("tune#", ParameterType.Required)
+                    .Parameter("tune#", ParameterType.Unparsed)
                     .Do(async (e) =>
                     {
                         //Channel voiceChannel = discordBot.FindServers("Bot Music").FirstOrDefault().VoiceChannels.FirstOrDefault();
                         voiceChannel = e.Server.VoiceChannels.Where(c => c.Name.ToLower().Contains(("Bot Music").ToLower())).Select(x => x).First();
                         var aService = await discordBot.GetService<AudioService>()
                             .Join(voiceChannel);
-                        string filePath = $"Music\\{e.GetArg("tune#")}.wma";
+                        string filePath = $"Music\\{e.GetArg("tune#")}";
 
                         await e.Channel.SendMessage("Music started on voice channel *Bot Music*");
-
                         Audio.StartMusic(filePath, discordBot, voiceChannel, aService);
-
                         await e.Channel.SendMessage("Music ended on voice channel *Bot Music*");
 
+                        await discordBot.GetService<AudioService>()
+                            .Leave(voiceChannel);
+                        Audio.StopPlaying();
                     });
+                #endregion
+
+                #region Stop
                 cg.CreateCommand("stop")
                     .Do(async (e) =>
                     {
@@ -401,6 +420,40 @@ The bot can be found at : https://github.com/IluvatarTheReal/IluvatarSuperBot");
 
                         await e.Channel.SendMessage("Music was stopped on channel *Bot Music*");
                     });
+                #endregion
+
+                #region Search
+                cg.CreateCommand("search")
+                    .Parameter("song", ParameterType.Unparsed)
+                    .Do(async (e) =>
+                    {
+                        IEnumerable<string> songs = BasicQuery.GetSongs().Where(s => s.ToLower().Contains(e.GetArg("song").ToLower()));
+
+                        string message = $"{e.User.NicknameMention}, your research returned {songs.Count()} result(s)\n";
+                        foreach (var s in songs)
+                        {
+                            message += $"{s}\n";
+                        }
+
+                        await e.Channel.SendMessage(message);
+                    });
+                #endregion
+
+                #region List
+                cg.CreateCommand("list")
+                .Do(async (e) =>
+                {
+                    IEnumerable<string> songs = BasicQuery.GetSongs();
+
+                    string message = $"{e.User.NicknameMention}, there are {songs.Count()} song(s) available\n";
+                    foreach (var s in songs)
+                    {
+                        message += $"{s}\n";
+                    }
+
+                    await e.Channel.SendMessage(message);
+                });
+                #endregion
 
             });
 
