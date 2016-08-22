@@ -69,7 +69,7 @@ namespace DiscordBot
                 await discordBot.Connect(token);
             });
 
-
+            
 
         }
 
@@ -79,7 +79,7 @@ namespace DiscordBot
 
             #region Ping Command
             cService.CreateCommand("ping")
-                .Description("returns 'Pong'")
+                .Description("Returbn")
                 .Do(async (e) =>
                 {
                     await e.Channel.SendMessage("Pong");
@@ -184,12 +184,14 @@ namespace DiscordBot
             #endregion
 
             #region Credit Command
-            cService.CreateCommand("Credit")
+            cService.CreateCommand("Info")
                 .Description("Try it!")
                 .Do(async (e) =>
                 {
                     Console.WriteLine($"[COMMAND]  [{e.User.Name}]  The CREDIT command was used.");
                     await e.Channel.SendMessage(@"Iluvatar's Super Bot was coded by Iluvatar/Samuel Reid
+You can install it on your server using this link : https://discordapp.com/oauth2/authorize?&client_id=198229043127123970&scope=bot&permissions=268528663
+OR
 The bot can be found at : https://github.com/IluvatarTheReal/IluvatarSuperBot");
                 });
             #endregion       
@@ -457,6 +459,9 @@ The bot can be found at : https://github.com/IluvatarTheReal/IluvatarSuperBot");
             });
 
             #endregion
+
+            //Link pour installer https://discordapp.com/oauth2/authorize?&client_id=198229043127123970&scope=bot&permissions=268528663
+
         }
 
         private static PermissionLevel GetPermissions(User u, Channel c)
