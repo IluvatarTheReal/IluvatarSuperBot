@@ -67,7 +67,7 @@ namespace DiscordBot
             string[] songs = Directory.GetFiles(@"Music\");
             for (int i = 0; i < songs.Length; i++)
             {
-               songs[i] = songs[i].Replace("Music\\", "");
+                songs[i] = songs[i].Replace("Music\\", "");
             }
             return songs;
         }

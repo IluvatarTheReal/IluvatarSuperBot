@@ -215,3 +215,5 @@ ModelManifest.xml
 *.exe
 obj/Debug/DiscordBot.exe
 *.pdb
+obj/Debug/DiscordBot.exe
+obj/Debug/DiscordBot.exe
