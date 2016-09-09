@@ -32,7 +32,7 @@ namespace DiscordBot
         public Discord.DiscordClient discordBot;
 
         //Enter your bot user Token
-        private string token = "MTk4MjI5MDU4NjY3MDIwMjkw.CldGsg.c285zBv1ZgcyTSYD9F1iT5nYnDo";
+        private string token = "";
         //Enter your user ID
         private static ulong ownerId = 166671297923907584;
 
